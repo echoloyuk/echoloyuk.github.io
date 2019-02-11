@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% include header.html %}
+  <title>{{page.title}}</title>
+  <link rel="stylesheet" href="/static/css/post.css">
+  <link rel="stylesheet" href="/static/css/markdown.css">
+</head>
+<body>
+  {% include banner.html %}
+  <header class="header" style="background-image:url({{page.bg}})">
+    <div class="panel">
+      <div class="title-grid">
+        <div class="title">{{page.title}}</div>
+        <div class="subtitle">{{page.subtitle}}</div>
+      </div>
+    </div>
+  </header>
+  <main class="main">
+    <section class="article markdown">
+      {{content}}
+    </section>
+  </main>
+  {% include footer.html %}
+</body>
+</html>

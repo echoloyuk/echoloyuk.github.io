@@ -1,0 +1,36 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{{site.title}}</title>
+  {% include header.html %}
+  <link rel="stylesheet" href="/static/css/home.css">
+</head>
+<body>
+  {% include banner.html %}
+  <header class="header" style="background-image: url({{site.home_img}})">
+    <div class="mask"></div>
+    <div class="center">
+      <div class="avatar" style="background-image: url({{site.avatar_img}})"></div>
+      <h1>{{site.title}}</h1>
+      <h2>{{site.description}}</h2>
+    </div>
+  </header>
+  <section class="article">
+    <div class="article-list">
+      {% for post in site.posts %}
+        <a class="article-item" href="{{ site.baseurl }}{{ post.url }}">
+          <div class="article-img" style="background-image:url({{post.bg}})"></div>
+          <div class="article-info">
+            <div class="title">{{post.title}}</div>
+            <div class="date">{{post.date | date_to_string }}</div>
+            <div class="abstract">{{post.excerpt | truncate: 100}}</div>
+          </div>
+        </a>
+      {% endfor %}
+      </div>
+  </section>
+  {% include footer.html %}
+</body>
+</html>

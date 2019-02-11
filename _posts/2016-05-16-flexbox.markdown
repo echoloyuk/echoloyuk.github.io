@@ -1,0 +1,302 @@
+---
+title: "CSS3 FlexBox 使用教程与说明"
+subtitle: "Flexbox的基本用法"
+bg: "//mac-blog.oss-cn-beijing.aliyuncs.com/blog-flex.jpg"
+---
+
+flexbox是CSS3中一个全新的布局方式，它解决了以往CSS中一些典型布局的不足，有效的减少了前端工程师在实现页面时的工作量。它的出现使得我们再例如使用简单的div模拟表格样式时变得非常简单。下面我们开始逐渐探索它的使用方法。
+
+下面所有的示例，都使用以下这个简单得不能再简单的DOM结构。
+```
+<div class="outer">
+    <div class="inner">A</div>
+    <div class="inner">B</div>
+    <div class="inner">C</div>
+    <div class="inner">D</div>
+</div>
+```
+上面是一个outer里面带着4个inner的结构。在使用flexbox之前，outer和inner需要带上几个固定的属性，便于我们能够直观的看到其效果。当然，这些属性都与flexbox无关，所以就不做格式上的缩进了。
+```
+.outer{height:100px;}
+.inner{width:100px;font-size:16px;padding:1em;box-sizing:border-box;}
+.inner:nth-child(4n+1){background-color:#30bbc9;}
+.inner:nth-child(4n+2){background-color:#4cde7f;}
+.inner:nth-child(4n+3){background-color:#debd4c;}
+.inner:nth-child(4n+4){background-color:#cb4cde;}
+```
+万事具备，下面我们将从这个html上，使用flexbox的属性。
+
+## about flexbox
+
+flexbox包含两个概念，一个是“伸缩容器”，一个是“伸缩项目”。其中，伸缩项目是伸缩容器的子节点，可以有多个。在我们的示例中，`outer`就是伸缩容器，`inner`就是伸缩项目。
+
+## flexbox start
+
+在使用flexbox之前，我们的示例代码的效果是：
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-1.jpg)
+
+为了便于修改，我们新起一个`style`标签。下面的flexbox示例就在这里开始。
+
+### display:flex
+```
+.outer{
+    display:flex;
+}
+```
+我们在outer上增加了这个属性之后，outer容器将会变成flex布局，display:flex将会使它所有子节点变成flex-item，或者说是“伸缩项目”。
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-2.jpg)
+这个时候，ABCD四个inner块变成了上图所示的样子，在平时，我们要向做到这个效果，需要使用例如`float:left`这样的方式才行，且我们还需要使用额外的容器或者样式来解决`闭合浮动元素`的问题。但是使用了该属性，这个要求已经可以达到了。
+
+### flex-direction
+* `row` (default) 横向-从左向右排列
+* `row-reverse` 横向-从右向左排列
+* `column` 纵向-从上向下排列
+* `column-reverse` 纵向-从下向上排列
+
+我们可以给outer元素增加`flex-direction`属性，该属性可以改变ABCD在outer中的排列方向。默认为`row`，当我们修改它为column时，它会是这样的效果。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-3.jpg)
+
+什么？你觉得它的显示有点问题？为什么都重叠在了一起？还记得我们在一开始里，我们设置了outer的`height`是100px吗？
+
+`row-reverse`和`column-reverse`会让ABCD的排列方向按照相反的方向进行布局。下面是设置成`row-reverse`后的效果：
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-4.jpg)
+
+### flex-wrap
+* `nowrap` (default) 单行，所有的伸缩项目都尝试在同一条主线上显示
+* `wrap` 单行或多行，如果伸缩项目不能在一条主线上显示，则超出的伸缩项目会换行
+* `wrap-reverse` 单行或多行，如果伸缩项目不能再一条主线实现，则超出的伸缩项目会换行，换行的方向相反
+
+伸缩容器会有一条主线（或叫主轴）（main axis），所有的伸缩项目会按照主轴排列，该属性将会决定所有的伸缩项目的在超出容器时，按照什么方式进行排列，还记得上面的例子么？高度只有100px，4个项目都被挤在了一起。同理，我们在outer上增加一个宽度，显然宽度不能足以放下4个项目，如果我们用默认的属性`nowrap`的话，将是下面的效果：
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-5.jpg)
+
+ABCD四个容器各100px宽高，而外部容器只有300px宽，显然，不能完全显示4个项目，因此，4个项目会尝试在一条主线上显示。
+
+如果我们使用`wrap`，那么超出的项目会在第二条主线上排列。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-6.jpg)
+
+高度同样是和容器高度为100px有关系。
+
+使用`nowrap-reverse`会在相反方向上做排列，怎么理解？就是原来向下新建一条主线，现在改在上面新建一个。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-7.jpg)
+
+关于主线和伸缩项目的排列，我们在上一节已经详细介绍过了。
+
+### flex-flow
+* [`flex-direction`] [`flex-wrap`]
+
+复合属性，由`flex-direction`和`flex-wrap`组成。下面两个写法是等价的。
+```
+.outer{
+    display:flex;
+    flex-flow:column nowrap;
+}
+```
+```
+.outer{
+    display:flex;
+    flex-direction:column;
+    flex-wrap:nowrap;
+}
+```
+
+### justify-content
+* `flex-start` (default) 伸缩项目向起始位置对齐
+* `flex-end` 伸缩项目向终止位置对齐
+* `center` 伸缩项目居中对齐
+* `space-between` 伸缩项目占据全部宽度，并且尽可能平均分配在空间中
+* `space-around` 伸缩项目平均分配在空间中
+
+该属性较为复杂。首先，`justify-content`无论主轴是横向的，还是纵向的，都将按照一套规则进行处理。下面详细介绍一下几个属性的方式。为了说明清楚，这里都按照`flex-direction:row`的情况说明，对于主轴为纵轴的，同理。
+
+`flex-start`是指，将伸缩项目向主轴的起始位置对齐：伸缩项目的第一个项目的左边界，与主轴的左边界重合，其他伸缩项目依次沿主轴紧邻排列，后一个挨着前一个排列。(为了便于演示，我们在outer上加了边界。)
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-8.jpg)
+
+`flex-end`是指，将伸缩项目向主轴的终止位置对齐：伸缩项目的最后一个项目的右边界，与主轴的右边界重合，其他伸缩项目依次沿着主轴紧邻排列。前一个挨着后一个排列。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-9.jpg)
+
+`center`是指，伸缩项目居中对齐：所有伸缩项目相互紧邻排列，同时，伸缩项目的第一个项目的左边界与主轴的左边界的*距离* 和 伸缩项目的最后一个项目的右边界与主轴右边界的*距离* 相同。如果所有伸缩项目所占长度超过主轴的长度，则左右两个*距离*平分溢出的部分。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-10.jpg)
+
+`space-between`是指，伸缩项目占据全部宽度，并且尽可能平均分配在空间中：伸缩项目的第一个项目的左边界与主轴的左边界重合，伸缩项目的最后一个项目的右边界与主轴右边界重合，中间剩余的伸缩项目之间的间距彼此相等。如果所有伸缩项目所占用的空间大于主轴的空间或只有一个伸缩项目，则该属性等同于`flex-start`。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-11.jpg)
+
+`space-around`是指，伸缩项目平均分配在空间中：所有伸缩项目平均的放置在主轴上。每个伸缩项目之间的距离是相同的，但是，第一个伸缩项目的左边界与主轴左边界的*距离* 和 最后一个伸缩项目的右边界与主轴右边界的*距离* 是伸缩项目之间距离的*一半*。如果所有伸缩项目所占用的空间大于主轴空间或只有一个伸缩项目，则该属性等同于`center`。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-12.jpg)
+
+### align-items
+* `flex-start` 伸缩项目按照侧轴（垂直轴）的起始边界重合
+* `flex-end` 伸缩项目按照侧轴的终止边界重合
+* `center` 伸缩项目按照侧轴的中间位置对齐
+* `baseline` 伸缩项目按照baseline对齐
+* `stretch` (default) 伸缩项目将拉伸至整个侧轴的高度
+
+侧轴（垂直轴）与主轴垂直，为了便于演示，我们将outer的高度修改的大一点并且修改每个inner有不同的高度，同时，我们固定`justify-content:space-around`。`align-items`的具体规则为：
+
+`flex-start`是指，伸缩项目按照侧轴的起始边界重合：伸缩项目的上边界与侧轴的上边界重合。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-13.jpg)
+
+说明：ABCD的高度是我故意设置成不一样的。
+
+`flex-end`是指，伸缩项目按照侧轴的终止边界重合：伸缩项目的下边界与侧轴的下边界重合。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-14.jpg)
+
+`center`是指，伸缩项目按照侧轴的中间位置对齐：伸缩项目的上边界与侧轴的上边界的*距离* 和 伸缩项目的下边界与侧轴的下边界的*距离* 相等。如果伸缩项目的高度大于侧轴的空间，则两个边距将平分溢出部分。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-15.jpg)
+
+`baseline`是指，伸缩项目按照baseline对齐：伸缩项目中，如果存在行内文本，则将所有伸缩项目的行内文本的baseline排列在同一条线上。如果伸缩项目中的行内文本轴与侧轴在同一方向或是同一条。则该属性等同于`flex-start`。为了便于演示，我将ABCD中的文本设置成不同大小的字体，用来提现baseline的对齐方式。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-16.jpg)
+
+上图中ABCD的文字，是在同一条线上对齐的。
+
+`stretch`是指，伸缩项目将拉伸至整个侧轴的高度：伸缩项目的上边界与侧轴的上边界重合，伸缩项目的下边界与侧轴的下边界重合。需要注意的是，浏览器仍然遵守`height`和`min-height`规则，因此，在设定了这两个属性的伸缩项目，该属性无效。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-17.jpg)
+
+### align-content
+该属性在伸缩元素没有溢出主轴空间时，都会按照`flex-start`显示。在`flex-wrap:wrap`时，才会看到效果。这里为了便于解释，我们将因为溢出而排列在新的一个主轴方向的伸缩元素序列称为“行”
+
+* `flex-start` 多行按照侧轴的起始位置对齐
+* `flex-end` 多行按照侧轴的终止位置对齐
+* `center` 多行按照侧轴的中间位置对齐
+* `space-between` 多行占据侧轴的全部空间，且第一行和最后一样分别占据边界，并尽可能平分空间
+* `space-around` 多行占据侧轴的全部空间，并尽可能评分空间
+* `stretch` (default) 多行拉伸占满所有侧轴的空间。
+
+为了便于演示，我们再次修改outer和inner，用于演示该属性的效果：
+```
+.outer{height:300px; width:300px; border:1px solid red;}
+.inner{width:100px;height:100px; font-size:16px;padding:1em;box-sizing:border-box;}
+.inner:nth-child(4n+1){background-color:#30bbc9;}
+.inner:nth-child(4n+2){background-color:#4cde7f;}
+.inner:nth-child(4n+3){background-color:#debd4c;}
+.inner:nth-child(4n+4){background-color:#cb4cde;}
+```
+`flex-start`是指，多行按照侧轴的起始位置对齐：第一行的上边界与侧轴的上边界重合，其他行依次向侧轴方向排列。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-18.jpg)
+
+`flex-end`是指，多行按照侧轴的种种位置对齐：最后一行的下边界与侧轴的下边界重合，其他行依次向侧轴方向排列。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-19.jpg)
+
+`center`是指，多行按照侧轴的中间位置对齐：所有行紧邻排列，第一行的上边界与侧轴的上边界的*距离* 和 最后一行的下边界与侧轴的下边界的*距离* 相同。如果所有行的空间大于侧轴空间，则两个距离平分溢出部分的距离。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-20.jpg)
+
+`space-between`是指， 多行占据侧轴的全部空间，且第一行和最后一样分别占据边界，并尽可能平分空间：第一行的上边界与侧轴的上边界重合，最后一行的下边界与侧轴的下边界重合，其余行的距离彼此相同排列。只有一行或所有行占据空间大于侧轴空间，则该属性等同于`flex-start`。为了演示，我们再次修改outer的宽度和高度，用来明显看出该属性的特征。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-21.jpg)
+
+`space-around`是指，行占据侧轴的全部空间，并尽可能评分空间：所有行平分侧轴空间，行与行之间的距离相等，第一行上边界与侧轴上边界的*距离* 和 最后一行下边界与侧轴下边界的*距离* 是行之间距离的一半。只有一行或者所有行占据空间大于侧轴空间，则该属性等同于`flex-start`。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-22.jpg)
+
+`stretch`是指，多行拉伸占满所有侧轴的空间：所有行的空间都会被拉伸，用于填满侧轴的所有空间。如果所有行所占空间大于侧轴空间，则该属性等同于`flex-start`。需要注意的是，CSS仍然会保证`height`和`min-height`的有效。因此，对于`height:auto`的伸缩项目，该属性有效。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-23.jpg)
+
+### order
+
+该属性作用在伸缩项目上，用来指定伸缩项目的顺序。数值从小到大按照主轴顺序排列。数值可以为负值。我们可以通过指定`order`来实现伸缩项目的顺序。例如：
+```
+.inner:nth-child(4n+1){order:1;}
+.inner:nth-child(4n+2){order:2;}
+.inner:nth-child(4n+3){order:4;}
+.inner:nth-child(4n+4){order:3;}
+```
+上述的代码我们故意将第三个伸缩项目的`order`和第四个的对调，它会显示出ABDC的顺序
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-24.jpg)
+
+### flex-grow
+
+该属性规定伸缩项目的拓展比率，默认为0。不能为负值。
+当伸缩项目的`flex-grow`值不为0时，该伸缩项目的宽度（或高度如果是column）将会按照比率占据剩余空间。所有的占据剩余空间的比率是根据所有伸缩项目`flex-grow`值而定的。如果伸缩容器的空间小于伸缩项目的空间，则所有伸缩项目会等比例缩小到占满所有空间。
+例如我们把ABCD按照4:3:2:1的大小进行分配代码如下：
+```
+.inner:nth-child(4n+1){flex-grow:4;}
+.inner:nth-child(4n+2){flex-grow:3;}
+.inner:nth-child(4n+3){flex-grow:2;}
+.inner:nth-child(4n+4){flex-grow:1;}
+```
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-25.jpg)
+
+当然，需要注意的是，伸缩项目仍然会保证基本的盒模型CSS样式的有效，上面的图中，我们已经把`padding`和`width`等属性去掉，否则，真正的显示比率将会由这些属性所影响。
+
+### flex-shrink
+
+该属性用于指定，当伸缩容器的空间不足以放下所有伸缩项目时，伸缩项目按照伸缩比例进行缩减。默认为1。
+对于没有该属性的伸缩项目，则默认按照1计算。缩减时，所有伸缩项目按照`flex-shrink`的大小进行计算比例，然后进行缩减。当伸缩容器的空间能够放下所有伸缩元素时，该属性无效。
+
+为了说明该属性的具体意义，我们来将上述例子进行一次模拟。我们把默认的环境稍微修改一下。outer的宽度设置为500px，去掉inner的padding，每个inner的宽度是100px。这样一来，outer能够完全放下4个伸缩元素。我们此时将ABCD按照4321的缩减比例进行设置：
+```
+.inner:nth-child(4n+1){flex-shrink:4;}
+.inner:nth-child(4n+2){flex-shrink:3;}
+.inner:nth-child(4n+3){flex-shrink:2;}
+.inner:nth-child(4n+4){flex-shrink:1;}
+```
+我们可以见到伸缩项目没有缩减，该属性无效：
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-26.jpg)
+
+下面，我们将outer的宽度设置为200px，这时，伸缩容器不能完全提供伸缩项目充足的空间。此时，浏览器将这么处理：
+
+* ABCD四个伸缩项目的需要的空间为400px，而伸缩容器的宽度只有200px，因此溢出的200px将由4个伸缩项目的`flex-shrink`的比例进行分配。
+* ABCD四个伸缩项目的总份数为4+3+2+1 = 10。
+* 因此，ABCD分别分担溢出的200px的部分为：A:(4/10)\*200=80, B:(3/10)\*200=60, C:(2:10)\*200=40, D:(1/10)\*200=20;
+* 因此，ABCD的真正宽度分别为: A:100-80=20px; B:100-60=40px; C:100-40=60px; D:100-20=80px;
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-27.jpg)
+
+### flex-basis
+
+该属性设置伸缩项目的基础宽度（或高度如果为column），默认为auto。数值可以采用百分比或数字，不允许负值。若所有伸缩项目的空间溢出了伸缩容器的空间，则所有伸缩项目将会按照`flex-basis`的值进行等比例缩小。下图是将C的`flex-basis:300px`后的效果。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-28.jpg)
+
+### flex
+* [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]
+
+它是`flex-grow`, `flex-shrink`, `flex-basis`三个属性的复合属性。
+
+### align-self
+
+它是写在伸缩元素上的`align-items`属性，您可以查看`align-items`属性的详细说明。该属性用于重载伸缩容器上的`align-items`属性。下面的是在C上单独设置了`align-self:flex-end`的效果。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/flexbox-29.jpg)
+
+
+## Reference
+
+* [CSS Flexible Box Layout Module Level 1](https://www.w3.org/TR/css-flexbox-1/)
+* [A Complete Guide to Flexbox](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+* [MDN Flex](https://developer.mozilla.org/en-US/docs/Web/CSS/flex)
+* [Learn CSS layout](http://learnlayout.com/flexbox.html)
+* [CSS88](http://www.css88.com/book/css/properties/flex/flex.htm)
+
+## Summary
+
+以上就是flexbox的全部使用方法，关于这部分标准未来w3c还会做出一定的修改，但是目前的方案，已经成为了推荐方案，且各个浏览器已经着手支持它。相信很快就能定下标准，成为标准CSS3属性。
+
+本文中的所有示例和属性，都只能在chrome38以上的版本支持，FireFox需要22以上，Safari9+，Opera17+，IE11，对于稍低的chrome和Safari版本，您可能需要`-webkit-`前缀。另外，伸缩模型的之前是有旧标准的，如果您在较早的浏览器上，可能需要作出旧flexbox的兼容代码。
+
+如有遗漏或错误，欢迎您随时指正和交流。
+
+版权所有，请勿转载。
+

@@ -1,0 +1,423 @@
+---
+title: "了解MusicXML"
+subtitle: "初探标准化乐谱格式"
+bg: "//mac-blog.oss-cn-beijing.aliyuncs.com/blog-music.jpg"
+---
+
+
+MusicXML是乐谱和音乐电子化领域的一个标准文档，它可以记录18世纪以来所有乐谱的展示和演奏细节。本文用来记录MusicXML中的基本标识和基本解析，最后给出一个Demo用来实例如果使用MusicXML进行演奏。
+
+当然，你也可以直接在这里访问Live Demo查看
+
+<div>
+  <a style="font-size:24px;font-weight:bold;color:#f00" href="http://www.himachi.cn/demo/lite-piano/index.html" target="_blank">访问Demo</a>
+</div>
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-1.png)
+
+写在这个文章之前，需要说明的是：该文章是一个站在非专业的前端工程师的角度对MusicXML的阐述，本文不会对数字音乐以及相关的音乐乐理只是做专业的阐述，而是专注于MusicXML的基本格式说明和解析MusicXML的相关技术细节。文中会有一些基础的乐理知识等，如果出现出现偏误，请及时给我指正。
+
+
+## MusicXML的来世
+
+### 基本需求：保存与传递音乐
+
+保存一段音乐是最最基本的需求，我们经常需要将一段自己的喜欢的旋律保存起来，放到电脑上播放或是自己的手机上，因此，在很长的一段时间里，距离我们日常生活最近的就是各类音乐的保存格式。常见的mp3、wav、ogg等。它们的原理都是将扬声器中的模拟信号转化为数字信号，并通过有损(或无损)的方式进行压缩后保存起来。当我们播放它们时，用相应的解码器将压缩的数字格式解开，再通过数-模转换器输出到扬声器，从而奏出动听的声音。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-2.png)
+
+但是这些文件都存在以下问题：
+
+- 只能记录最终的扬声器播放频谱
+- 离散的表示连续的音调过程
+- 数据量大
+
+### 第二个需求：修改和表达音乐
+
+我们知道，无论采用什么格式的压缩方法，如果我们只保存音乐的最终结果，都只能是播放和传递音乐。由于最终的播放的结果是连续的，因此，我们无法准确的定位音乐中某一个音调。因此，对于一些从事电子音乐领域的专业DJ或音乐制作人来说，直接通过修改最终结果是无法满足改音的需求的。业界很快诞生了很多解决相关问题的标准。MIDI在领域中应用较为广泛，且被普遍接受和应用。
+
+MIDI (Music Instrument Digital Interface) 为音乐数字接口，是一个工业标准的电子通信协议，为电子乐器等演奏设备定义各种音符和弹奏码。它的出现，可以支持各类电子乐器、计算机等各种电子设备之间互联。
+
+MIDI保存的不是最终的音频结果，而是音频结果之前的弹奏信息。它主要记录了：音调、强度、音量、颤音、相位等各类乐器在演奏时的控制信号，同时，还支持设置节奏和时钟信号。这就相当于，保存下了一个音乐的演奏过程。在不同的播放设备上，设备根据MIDI的信息，实时演奏。针对这种格式的音乐文件，一些专业操作例如：混音、升降调、改音、合成等各类操作，都变得十分简单。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-3.png)
+
+但是MIDI等相似的标准存在另外一个主要缺陷：
+
+- 只记录了演奏的过程，但无法记录演奏逻辑
+
+### 乐谱的可视化：MusicXML
+
+由于MIDI格式的文件不记录演奏的逻辑，因此它只适于演奏，但不适于显示。我们日常看到的音乐五线谱等，都无法在MIDI中表示。业界内又针对这个需求出现了很多用于展示乐谱的音乐文件格式。但这些乐谱格式都不是通用规范，每种格式都有各自的软件进行支持，很难通用。因此，在2004年，Recordare公司发布了一个通用的乐谱格式：MusicXML。采用XML的文档描述格式，来描述乐谱。
+
+MusicXML在2005年发布1.1版本，对乐谱的支持程度进行了扩展。在2007年推出了2.0版本，增加了压缩格式和更多的乐谱类型。2014年推出了3.0版本，后面又进行一次更新，如今3.1版本的MusicXML应支持了从18世纪以来，所有的古典音乐乐谱的展示逻辑，包括：多声部、多乐器、章节、音调、升降掉、音符展示、连音、五线谱位置、歌词、强弱等所有乐谱上可以表示的信息。
+
+MusicXML目前已经成为W3C的一个小组，专门负责电子音乐相关的行业标准指定。详情请参考[W3C MUSIC NOTATION COMMUNITY GROUP](https://www.w3.org/community/music-notation/)
+
+当然，MusicXML也有自己的缺点，由于它要兼容所有格式的乐谱，因此，一个很简单的乐谱在MusicXML中会表示的非常复杂，当然，MusicXML2.0版本提供了一个压缩的二进制表示法，但这并不能解决文件结构复杂的问题。
+
+#### 一个最基本的MusicXML HelloWorld
+
+针对下列一个最简单的乐谱章节：
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-4.png)
+
+采用MusicXML记录后的内容为：
+
+```
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE score-partwise PUBLIC
+    "-//Recordare//DTD MusicXML 3.1 Partwise//EN"
+    "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.1">
+    <part-list>
+        <score-part id="P1">
+            <part-name>Music</part-name>
+        </score-part>
+    </part-list>
+    <part id="P1">
+        <measure number="1">
+            <attributes>
+                <divisions>1</divisions>
+                <key>
+                    <fifths>0</fifths>
+                </key>
+                <time>
+                    <beats>4</beats>
+                    <beat-type>4</beat-type>
+                </time>
+                <clef>
+                    <sign>G</sign>
+                    <line>2</line>
+                </clef>
+            </attributes>
+            <note>
+                <pitch>
+                    <step>C</step>
+                    <octave>4</octave>
+                </pitch>
+                <duration>4</duration>
+                <type>whole</type>
+            </note>
+        </measure>
+    </part>
+</score-partwise>
+```
+
+我们可以在上面这个示例中看到，一个只有一小节的乐谱在MusicXML中需要很长一段XML才能描述完毕。正是因为MusicXML的广泛兼容和通用的支持，造成了它需要很多的属性与节点才能将一个乐谱描述清楚。
+
+## MusicXML格式与基本功能
+
+### scorewise & timewise
+
+MusicXML中的根节点有两个类型，一个为`<score-partwise>`，一个为`<score-timewise>`。partwise表明当前的乐谱是以声部或演奏单元为单位进行记录的，timewise表明当前的乐谱以时间为单位进行记录。这两个不同类型可以相互转换。之所以有这两个类型，是从乐谱的用途角度考虑。
+
+这里举一个好理解的例子：对于一个交响乐队来说，小提琴声部在一般情况下，主要关注小提琴这部分的乐谱，同理长号手也只关心长号声部的乐谱。因此，`<score-partwise>`格式会将不同声部或不同乐器的谱子分开记录，便于解析时直接找到对应乐器或声部的所有乐谱。
+
+同样，对于乐队指挥来说，他需要关注的乐谱就是整个乐队的总谱，并实时把握整个乐曲的进行和各声部的配合，这时，乐队指挥往往关注的不是某一个声部，而是所有声部在当前的小节中是什么状态。这就是按`<score-timewise>`作为根节点的意义。
+
+由此可以简单的理解，`<score-partwise>`和`<score-timewise>`这两类根节点下，乐谱的用途和突出的目的是不同的。`<score-partwise>`是以整个乐曲的各个声部或部分作为划分，每个声部或乐器部分下划分若干小节，每个小节下有若干音符；`<score-partwise>`则是以时间为单位（即小节为单位），每个小节下分别列出了该小节中每个声部或乐器的部分，每个乐器部分中是具体的若干音符。对比他们的区别可以简单理解为：
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-5.png)
+
+从上图中可以看出，`<score-partwise>`和`<score-timewise>`可以相互转换，他们所代表的乐谱结果也是相同的，区别只是根据用途所采取的不同方式而已。
+
+本文将主要介绍`<score-partwise>`下的根节点的基本构成（和`<score-timewise>`主要区别在子节点上，note节点等是相同的）
+
+### part-list 声部、乐器、行标识
+
+`<part-list>`为声部或乐器部分的列表，主要用来表示当前乐谱共有多少个声部或乐器。每一个list中有对应的`id`，`id`作为部分的唯一表示来标识所有部分的乐谱。
+
+eg.
+
+```
+<score-partwise version="3.0">       <!-- 根节点: score-partwise -->
+    <part-list>                        <!-- 行(分谱,声部,乐器)列表 -->
+        <score-part id="P1">
+            <part-name>Piano</part-name>   <!-- 钢琴 -->
+        </score-part>
+        <score-part id="P2">
+            <part-name>Guitar</part-name>  <!-- 吉他 -->
+        </score-part>
+    </part-list>
+    <part id="P1">                     <!-- 钢琴部分的乐谱  -->    
+        ...
+    </part>
+    <part id="P2">                     <!-- 吉他部分的乐谱  -->    
+        ...
+    </part>
+</score-partwise>
+```
+
+### measure 小节标识
+
+`<measure>`为小节标识，也是乐谱的基本组成。在乐谱上，一个小节可以理解为五线谱中的一个部分，例如下图中红框的部分就是一个小节。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-6.png)
+
+一般在第一个小节中，会有整个小节的属性`<attributes>`。`<attributes>`中包含了该小节中的若干特性，一般一个声部下的所有小节属性都是相同的，因此`<attributes>`只会出现在每行的第一个小节中。当然，对于若干行的首部，虽然都有`<attributes>`，但他们的信息在绝大多数下是相同的。它包含了以下常用的属性：
+
+- `<divisions>` 小节中的一个四分音符的标准长度（时间长度），这里会在`note`标识中详细介绍
+- `<key>` 调号，例如：C大调，D大调
+- `<time>` 节拍信息，例如4/2拍
+- `<clef>` 谱号信息，例如高音谱号
+
+`<key>`为调号，我们常见的D大调、E大调等都是在这里定义的。例如：
+
+```
+<key>                        <!-- D大调标识 -->
+    <fifths>2</fifths>       <!-- D调 -->
+    <mode>major</mode>       <!-- major为大调，minor为小调  -->
+</key>
+```
+
+`<time>`为节拍信息，我们经常说的4/2拍、4/3拍等，在这里标识，例如：
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-7.png)4/4拍可以表示为：
+
+```
+<time>                         <!-- 4/4 拍 -->
+    <beats>4</beats>           <!-- 每小节有4拍 -->
+    <beat-type>4</beat-type>   <!-- 以四分音符为基准 -->
+</time>
+```
+
+`<clef>`为谱号信息，我们常见的乐谱有高音谱号和低音谱号，它们是在该标识中表示的。
+
+常见的高音谱号和低音谱号如下： ![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-8.png)
+
+他们的表示方式为：
+
+```
+<clef>
+    <sign>G</sign>
+    <line>2</line>             <!-- 高音谱号(G谱号) -->
+</clef>
+```
+
+### note 音符标识
+
+`<note>`为音符标识，它是`<measure>`下的一个重要子节点。如果你要读取一个乐谱的所有音符，那么note就是你的目标。简单来说，`<note>`是乐谱中的一个音符，就是我们常说的五线谱中的一个“蝌蚪”，如果一个小节中5个音符，那么你就可以在当前的`<measure>`中找到5个`<note>`。note下有一些常用的子节点属性用于表示当前音符的不同特性：
+
+- `<pitch>` 音高，我们常说的do, re, mi，以及所在的八度
+- `<duration>` 音长，还记得上一章节中说的`<divisions>`么？这里要用到
+- `<type>` 音符类型，例如四分音符，八分音符等
+- `<staff>` 所属行
+- `<beam>` 音符之间的连线
+- `<dot>` 音符后面的点
+
+下面我们专门介绍一下`<pitch>`音高标识
+
+#### pitch 音高标识
+
+首先，一个“蝌蚪”在五线谱上有自己的音高，`<pitch>`标识用来表示当前这个音符在五线谱上的位置，它还有若干子节点来表示音高和其他属性:
+
+- `<step>` 音阶，C, D, E, F, G, A, B。在C大调中，他们的唱名分别是：do, re, mi, fa, so, la, ti
+- `<octave>` 八度。以钢琴为例，钢琴一共有88键，涉及8个八度，我们常说的标准音do是在钢琴上是第四个8度
+- `<alter>` 升降调。例如C的升调为C#，对应钢琴的C键右侧的黑键。
+
+例如中央C：![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-9.png)可以表示为：
+
+```
+<note>
+    <pitch>
+        <step>C</step>        <!-- C：do -->
+        <octave>4</octave>    <!-- 位于第四个八度 -->
+    </pitch>
+    ...
+</note>
+```
+
+#### duration 音长标识
+
+`<duration>`音长标识用来表示当前音演奏时长。它与`<attrbute>`中的`<divisions>`相互配合，来表达当前音符总共演奏多长时间。我们来看下面这个例子：
+
+```
+<measure>
+    <attributes>
+        <divisions>100</divisions>     <!-- 标准4分音符长度 -->
+        ...
+    </attributes>
+    <note>
+        <pitch>
+            <step>C</step>
+            <octave>4</octave>
+        </pitch>
+        <duration>50</duration>        <!-- 演奏长度为标准长度的一半 -->
+        ...
+    </note>
+</measure>
+```
+
+我们可以看到`divisions`为100，当前note的音符的`duration`为50，这就表明，当前这个音的演奏时间为标准时间的一半。如果，我们设置程序标准4分音符的时间长度为500ms，那么当前这个音的演奏长度就是250ms (50 / 100 * 500ms)。
+
+由此看来，每个note的`<duration>`都代表了当前这个音符的演奏长度，它的演奏时长为`<duration>`/`<divisions>`*标准时长。当然，标准时长是程序或开发者自己控制的，你可以把四分音符的标准长度设置为100ms，那么每个音符的最终演奏长度就非常紧凑，如果你把四分音符的标准长度设置为2000ms，那么相同的乐谱就会演奏的像哀乐。
+
+#### 其他
+
+`<type>`为音符类型标识，用来表示当前这个音符是四分音符、八分音符还是全音符等。这里给出常见的音符类型和取值：
+
+- `32nd` 32分音符
+- `16th` 16分音符
+- `eighth` 8分音符
+- `quarter` 4分音符
+- `half` 半音符
+- `whole` 全音符
+
+`<staff>`为所属行。我们常见的乐谱可能分为高低声部等，每一个声部都会有自己独立的一行五线谱，`<staff>`用来表示当前这个音符属于哪个五线谱上。在下面这个情况下，`<staff>`就显得非常重要了。
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-10.png)
+
+`<beam>`为音符之间的连线，我们经常看到乐谱中将有两个相邻的八分音符，通常的做法是将这两个八分音符链接起来，`<beam>`就是为链接两个音符而存在的标识。例如：
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-11.png)标识为：
+
+```
+<measure>
+    <note>
+        <pitch>
+            <step>G</step>
+            <octave>4</octave>
+        </pitch>
+        ...
+        <beam number="1">begin</beam>    <!-- 一个连线，number为1，它是起点 -->
+    </note>
+    <note>
+        <pitch>
+            <step>G</step>
+            <octave>4</octave>
+        </pitch>
+        ...
+        <beam number="1">end</beam>      <!-- number为1的连线，它是终点 -->
+    </note>
+</measure>
+```
+
+`<dot>`为音符后面的点，用来表示当前音符延长当前音符的一半的长度。例如：![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-12.png)
+
+
+### 小结一下
+
+上面介绍了一些基本MusicXML的标识意义，由于它的标识有很多，这里不能全面介绍，你可以参考[MusicXML Element](https://usermanuals.musicxml.com/MusicXML/Content/EL-MusicXML.htm)来了解所有的标识和意义。是时候总结一下上面的基本内容了，下面给出一个两小节的乐谱，并给出它的基本MusicXML的示例。（注意，由于MusicXML中的内容和标记非常多，因此只给出上面介绍的内容。当然，有这些内容就已经足够让你的程序演奏出基本的音调了）
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-13.png)
+
+上面这三个小节是“生日歌”的第一句“happy birthday to you”的乐谱，用我们刚才介绍的MusicXML标识可以写为：
+
+```
+<score-partwise>
+    <measure number="1" width="62">
+        <attributes>
+            <divisions>6720</divisions>         <!-- 标准四分音符基准 -->
+            <time>                              <!-- 4/3拍 -->
+                <beats>3</beats>
+                <beat-type>4</beat-type>
+            </time>
+            <clef number="1">                   <!-- 高音谱 -->
+                <sign>G</sign>
+                <line>2</line>
+            </clef>
+        </attributes>
+    </measure>
+    <measure number="2">
+        <note>
+            <pitch>                             <!-- 第一个音符，G4 -->
+                <step>G</step>
+                <octave>4</octave>
+            </pitch>
+            <duration>3360</duration>           <!-- 演奏长度为标准的一半 -->
+            <type>eighth</type>                 <!-- 这是一个八分音符 -->
+            <beam number="1">begin</beam>       <!-- 上面有个连线，这是开始 -->
+        </note>
+        <note>
+            <pitch>                             <!-- 第二个音符，G4 -->
+                <step>G</step>
+                <octave>4</octave>
+            </pitch>
+            <duration>3360</duration>
+            <type>eighth</type>
+            <beam number="1">end</beam>         <!-- 上面的连线结束 -->
+        </note>
+        <note>
+            <pitch>                             <!-- 第三个音符A4 -->
+                <step>A</step>
+                <octave>4</octave>
+            </pitch>
+            <duration>6720</duration>           <!-- 演奏长度为标准长度 -->
+            <type>quarter</type>                <!-- 这是一个四分音符 -->
+        </note>
+        <note>
+            <pitch>
+                <step>G</step>
+                <octave>4</octave>
+            </pitch>
+            <duration>6720</duration>
+            <type>quarter</type>
+        </note>
+    </measure>
+    <measure number="3">
+        <note>
+            <pitch>
+                <step>C</step>
+                <octave>5</octave>
+            </pitch>
+            <duration>3360</duration>
+            <type>eighth</type>
+            <beam number="1">begin</beam>
+        </note>
+        <note>
+            <pitch>
+                <step>C</step>
+                <octave>5</octave>
+            </pitch>
+            <duration>3360</duration>
+            <type>eighth</type>
+            <beam number="1">end</beam>
+        </note>
+        <note>
+            <pitch>
+                <step>B</step>
+                <octave>4</octave>
+            </pitch>
+            <duration>13440</duration>
+            <type>half</type>
+        </note>
+    </measure>
+</score-partwise>
+```
+
+上面的示例中省去了其他非必要的数据和内容，根据上述的基本MusicXML，我们就已经可以知道最基本的演奏内容了，并可以着手写程序来演奏这段乐曲了。
+
+## Demo
+
+写到这儿，你也许会想，是不是该来个Demo看看了？没错，下面将给出一个相对复杂一些的Demo。
+
+下面这个Demo将演示了通过JavaScrpit来解析一个MusicXML格式的乐谱，并提取出最基本的演奏内容，并进行自动演奏播放的功能。
+
+钢琴的演奏部分由我自己封装的一个库[Lite-piano](https://github.com/echoloyuk/lite-piano)来实现，它提供了一个最基本的基于Web Audio API演奏钢琴88键音效的JavaScript库，Demo中将解析《Cannon in D》（D大调卡农）的MusicXML格式，并将解析后需要播放的所有音调放到一个数组中，点击Play按钮将会调用`requestAnimationFrame()`来实时取出当前时间需要按下的琴键。
+
+由于Lite-piano需要加载7个基本的钢琴频谱用来播放声音，因此整个文档大概需要记载3.5M的钢琴音频文件内容，因此建议您在wifi下点击Demo查看，并耐心等待网络加载（其实是因为穷，没有特别快的CDN服务... :- P）
+
+访问Demo之前，请确保你的电脑或手机音量处在合适的档位。注意，Demo中没有停止键，如果想停止播放，请关闭当前页面
+
+**[Live Demo: Cannon in D](http://www.himachi.cn/demo/lite-piano/index.html)**
+
+![](//mac-blog.oss-cn-beijing.aliyuncs.com/music-1.png)
+
+Enjoy it~~
+
+## At Last.
+
+又到了总结阶段。本来这篇文章不会出现，因为我一开始只是用来研究Web Audio API并写一个钢琴Demo而学习MusicXML的，但后来发现，MusicXML有大量的内容和知识值得总结和沉淀，因此有了这篇文章。
+
+MusicXML在很大程度上不算前端技术，也不是常见的应用场景，但它是在电子音乐和音乐电子化领域起到了很大的作用，因此作为个人的学习补充内容，在这里沉淀下来。同时，由于MusicXML的中文教程相对较少，也很少有人详细做出过沉淀，因此在这里做一点点贡献吧。
+
+
+## Reference
+
+你可以在这里查看一些其他同仁做出的贡献，同时，还有官方的英文文档用于准确的查询。
+
+- [MusicXML 3.0 (1) - "Hello World" in MusicXML](https://www.cnblogs.com/del/archive/2011/10/21/2220788.html)
+- [MusicXML 元素 官方手册](https://usermanuals.musicxml.com/MusicXML/Content/EL-MusicXML.htm)
+- [MusicXML官网](https://www.musicxml.com/)
+

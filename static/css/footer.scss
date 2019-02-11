@@ -1,0 +1,47 @@
+---
+---
+
+footer.footer {
+  height: 240px;
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+  text-align: center;
+  font-size: 13px;
+  margin-top: 50px;
+  .copy, .icp, .base {
+    a {
+      color: #333;
+      transition: all .3s;
+    }
+  }
+
+  .copy {
+    padding-top: 80px;
+  }
+  .icp {
+    padding-top: 50px;
+  }
+  .base {
+    padding-top: 10px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  footer.footer {
+    height: auto;
+    font-size: 0.6rem;
+
+    .copy {
+      font-size: .8rem;
+      padding: 2rem;
+    }
+    .icp {
+      padding: 1rem 0 .5rem;
+    }
+    .base {
+      font-size: .6rem;
+      text-align: center;
+      padding: .5rem 2rem 1rem;
+    }
+  }
+}

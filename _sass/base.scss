@@ -1,0 +1,5 @@
+@import 'var';
+
+@function rpx($px) {
+  @return $px / $global-font-size-num * 1rem;
+}

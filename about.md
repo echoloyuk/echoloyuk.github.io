@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 关于我
+title: 关于我自己
 permalink: /about/
 bg: "//mac-blog.oss-cn-beijing.aliyuncs.com/about.jpg"
 ---
